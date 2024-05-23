@@ -28,28 +28,37 @@ function initMap () {
           title: "Your Location",
         });
 
-        // Define the LatLng coordinates for the outer path based on user's location
-        const outerCoords = [
-          { lat: userPos.lat - 0.05, lng: userPos.lng - 0.05 },
-          { lat: userPos.lat + 0.05, lng: userPos.lng - 0.05 },
-          { lat: userPos.lat + 0.05, lng: userPos.lng + 0.05 },
-          { lat: userPos.lat - 0.05, lng: userPos.lng + 0.05 },
-        ];
-
-        // Create the polygon
-        const polygon = new google.maps.Polygon({
-          paths: [outerCoords],
-          strokeColor: "#FF0000",
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: "#FF0000",
-          fillOpacity: 0.35,
+        // Initialize the Drawing Manager
+        const drawingManager = new google.maps.drawing.DrawingManager({
+          drawingMode: google.maps.drawing.OverlayType.POLYGON,
+          drawingControl: true,
+          drawingControlOptions: {
+            position: google.maps.ControlPosition.TOP_CENTER,
+            drawingModes: ["polygon"],
+          },
+          polygonOptions: {
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+          },
         });
 
-        // Add the polygon to the map
-        polygon.setMap(map);
+        // Add the Drawing Manager to the map
+        drawingManager.setMap(map);
+
+        // Add an event listener for the completion of the polygon drawing
+        google.maps.event.addListener(
+          drawingManager,
+          "polygoncomplete",
+          function (polygon) {
+            console.log("Polygon completed:", polygon);
+            // You can handle the polygon object here, e.g., save its coordinates
+          }
+        );
       },
-   
+
       () => {
         handleLocationError(true, infoWindow, map.getCenter());
       }
