@@ -53,8 +53,31 @@ function initMap () {
           drawingManager,
           "polygoncomplete",
           function (polygon) {
-            console.log("Polygon completed:", polygon);
-            // You can handle the polygon object here, e.g., save its coordinates
+           console.log("Polygon completed:", polygon);
+            let geocoder = new google.maps.Geocoder();
+            let zipCodes = new Set(); // Use a set to avoid duplicate zip codes
+            let polygonCoords = polygon.getPath().getArray();
+
+            polygonCoords.forEach((latLng, index) => {
+              geocoder.geocode({ location: latLng }, function (results, status) {
+                if (status === google.maps.GeocoderStatus.OK && results) {
+                  results.forEach(result => {
+                    result.address_components.forEach(component => {
+                      if (component.types.includes("postal_code")) {
+                        zipCodes.add(component.long_name);
+                      }
+                    });
+                  });
+                  if (index === polygonCoords.length - 1) {
+                    // Log zip codes once all points are processed
+                    console.log("Zip Codes inside the polygon:", Array.from(zipCodes));
+                  }
+              } else {
+                console.error("Geocode was not successful for the following reason:",status);
+                   console.error("Geocoding request failed with the following results:",results);
+              }
+            });
+            });
           }
         );
       },
